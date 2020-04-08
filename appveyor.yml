@@ -44,6 +44,11 @@ matrix:
 
 install:
   #
+  # Try to install WinPcap
+  #
+  # - cinst winpcap
+
+  #
   # Prepend the PATH for 'make' + 'sh' used by 'MinGW', 'djgpp', 'CygWin' etc.
   #
   - cmd: set PATH=c:\msys64\usr\bin;%PATH%
@@ -62,7 +67,7 @@ build_script:
     - cmd: appveyor-script.bat build_bin
 
 test_script:
-#    - cmd: set PATH=c:\Python34;%PATH% & python.exe appveyor-script.py build_tests
+#    - cmd: set PATH=c:\Python34;%PATH% & set USE_CURL=1 & python.exe appveyor-script.py build_tests
      - cmd: appveyor-script.bat build_tests
 
 #

@@ -11,6 +11,8 @@ prompt $P$G
 set URL_DJ_WIN_ZIP=http://www.watt-32.net/CI/dj-win.zip
 set URL_WATCOM_ZIP=http://www.watt-32.net/CI/watcom20.zip
 set URL_BORLAND_ZIP=http://www.watt-32.net/CI/borland.zip
+set URL_WINPCAP_EXE=https://www.winpcap.org/install/bin/WinPcap_4_1_3.exe
+set URL_LLVM_EXE=https://prereleases.llvm.org/win-snapshots/LLVM-10.0.0-e20a1e486e1-win32.exe
 
 ::
 :: D/L from MS's OneDrive instead with the below cryptic 'URL_x' strings.
@@ -50,6 +52,7 @@ if %APPVEYOR_PROJECT_NAME%. == . (
   set WATT_ROOT=c:\projects\watt-32
   set APPVEYOR_BUILD_FOLDER=c:\projects\watt-32
   set APPVEYOR_BUILD_FOLDER_UNIX=c:/projects/watt-32
+  set WATTCP.CFG=%WATT_ROOT%
   set _ECHO=c:\msys64\usr\bin\echo.exe -e
 )
 
@@ -98,11 +101,8 @@ set DOS_INCLUDE=%WATCOM%\h
 ::
 set BCCDIR=%CI_ROOT%
 
-rem set LIBDIR=%BCCDIR%\lib
-rem set MAKEDIR=%BCCDIR%\bin
-
-set INCLUDE=%BCCDIR%\include\windows;%BCCDIR%\include\windows\sdk;%INCLUDE%
-set CBUILDER_IS_LLVM_BASED=1
+if %BUILDER%. == borland. set CBUILDER_IS_LLVM_BASED=1
+if %BUILDER%. == borland. set INCLUDE=%BCCDIR%\include\windows;%BCCDIR%\include\windows\sdk;%INCLUDE%
 
 ::
 :: Shit for brains 'cmd' cannot have this inside a 'if x (' block since
@@ -173,7 +173,7 @@ if %LOCAL_TEST% == 1 (
 set CL=
 %_ECHO% "\e[1;33mGenerating 'src/oui-generated.c'.\e[0m"
 python.exe make-oui.py > oui-generated.c
-if errorlevel 0 set CL=-DHAVE_OUI_GENERATATED_C
+if errorlevel 0 set CL=-DHAVE_OUI_GENERATED_C
 %_ECHO% "\e[1;33m--------------------------------------------------------------------------------------------------\e[0m"
 
 if %BUILDER%. == visualc. (
@@ -341,11 +341,18 @@ exit /b 0
 :: All these generated makefiles requires GNU-make (a 'make' should already be on 'PATH').
 ::
 :build_tests
+  if %LOCAL_TEST. == 0. (
+    %_ECHO% "\e[1;33mGenerating 'c:\projects\watt-32\wattcp.cfg\wattcp.cfg'.\e[0m"
+    call :generate_wattcp_cfg
+  )
+
   cd src\tests
 
   set USE_WSOCK_TRACE=0
 
   if %CPU%. == x86. set PATH=c:\Program Files (x86)\LLVM\bin;%PATH%
+
+  %_ECHO% "\e[1;33m[%CPU%]Configuring 'build_tests' for 'BUILDER=%BUILDER%'.\e[0m"
 
   call configur.bat %BUILDER%
   if %BUILDER%. == borland.  make -f bcc_w.mak
@@ -391,7 +398,7 @@ exit /b 0
 
 :download_LLVM
   %_ECHO% "\e[1;33mDownloading 32-bit LLVM...'.\e[0m"
-  curl -# -o %CI_ROOT%\llvm-installer.exe https://prereleases.llvm.org/win-snapshots/LLVM-10.0.0-e20a1e486e1-win32.exe
+  curl -# -o %CI_ROOT%\llvm-installer.exe %URL_LLVM_EXE%
   if not errorlevel == 0 (
     %_ECHO% "\e[1;31mThe curl download failed!\e[0m"
     exit /b 1
@@ -445,3 +452,39 @@ exit /b 0
   7z x -y -o%WATCOM% %CI_ROOT%\watcom20.zip > NUL
   exit /b
 
+
+::
+:: Download and install WinPcap
+::
+:install_winpcap
+  if exist %CI_ROOT%\WinPcap\Uninstall.exe exit /b
+  %_ECHO% "\e[1;33mDownloading WinPcap 4.1.3:\e[0m"
+  curl -# -o %CI_ROOT%\WinPcap_4_1_3.exe %URL_WINPCAP_EXE%
+  if not errorlevel == 0 (
+    %_ECHO% "\e[1;31mThe curl download failed!\e[0m"
+    exit /b
+  )
+  %CI_ROOT%\WinPcap_4_1_3.exe
+  exit /b
+
+::
+:: Generate a 'c:\projects\watt-32\wattcp.cfg' for AppVeyor
+::
+:generate_wattcp_cfg
+  echo debug           = 2                                    > c:\projects\watt-32\wattcp.cfg
+  echo nameserver      = 8.8.8.8                             >> c:\projects\watt-32\wattcp.cfg
+  echo winpkt.device   =                                     >> c:\projects\watt-32\wattcp.cfg
+  echo winpkt.dumpfile = -                                   >> c:\projects\watt-32\wattcp.cfg
+  echo winpkt.trace    = 2                                   >> c:\projects\watt-32\wattcp.cfg
+  echo winpkt.rxmode   = 0x20                                >> c:\projects\watt-32\wattcp.cfg
+  echo my_ip           = 10.0.0.2                            >> c:\projects\watt-32\wattcp.cfg
+  echo gateway         = 10.0.0.1                            >> c:\projects\watt-32\wattcp.cfg
+  echo netmask         = 255.255.255.0                       >> c:\projects\watt-32\wattcp.cfg
+  echo hosts           = $(WATT_ROOT)\bin\hosts              >> c:\projects\watt-32\wattcp.cfg
+  echo hosts6          = $(WATT_ROOT)\bin\hosts6             >> c:\projects\watt-32\wattcp.cfg
+  echo services        = $(WATT_ROOT)\bin\services           >> c:\projects\watt-32\wattcp.cfg
+  echo protocols       = $(WATT_ROOT)\bin\protocol           >> c:\projects\watt-32\wattcp.cfg
+  echo networks        = $(WATT_ROOT)\bin\networks           >> c:\projects\watt-32\wattcp.cfg
+  echo ethers          = $(WATT_ROOT)\ethers                 >> c:\projects\watt-32\wattcp.cfg
+  type c:\projects\watt-32\wattcp.cfg
+  exit /b
