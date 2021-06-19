@@ -220,6 +220,9 @@ DEF_FUNC (DWORD, GetIpForwardTable2,
           (__in  WORD                   family,
            __out MIB_IPFORWARD_TABLE2 **table));
 
+DEF_FUNC (BOOL, GetIpForwardEntry2,
+          (__inout MIB_IPFORWARD_ROW2 *row));
+
 DEF_FUNC (DWORD, ConvertInterfaceLuidToIndex,
           (__in  const NET_LUID    *luid,
            __out       NET_IFINDEX *index));
@@ -396,6 +399,7 @@ static struct LoadTable dyn_funcs2[] = {
                         ADD_VALUE ("iphlpapi.dll", GetBestRoute),
                         ADD_VALUE ("iphlpapi.dll", GetBestRoute2),
                         ADD_VALUE ("iphlpapi.dll", GetIpForwardTable2),
+                        ADD_VALUE ("iphlpapi.dll", GetIpForwardEntry2),
                         ADD_VALUE ("iphlpapi.dll", ConvertInterfaceLuidToIndex),
                         ADD_VALUE ("iphlpapi.dll", ConvertInterfaceLuidToNameA),
                         ADD_VALUE ("iphlpapi.dll", GetIpNetworkConnectionBandwidthEstimates),
@@ -2015,6 +2019,14 @@ static void print_mib_if_row2 (DWORD index, const MIB_IF_ROW2 *row)
     }
   }
 }
+
+#else
+static const char *get_if_type (DWORD if_type)
+{
+  static char buf [10];
+
+  return itoa ((int)if_type, buf, 10);
+}
 #endif /* ON_WIN_VISTA && HAVE_NETIOAPI_H */
 
 /*
@@ -3207,8 +3219,8 @@ static void print_wlan_networklist (const WLAN_AVAILABLE_NETWORK_LIST *wlist)
     const WLAN_AVAILABLE_NETWORK *bss = (const WLAN_AVAILABLE_NETWORK*) wlist->Network + i;
     int   dBm;
 
-    (*_printf) ("    Profile Name[%lu]:        %" WIDESTR_FMT "\n",
-                (u_long)i, bss->strProfileName[0] ? bss->strProfileName : L"<Not connected>");
+    (*_printf) ("    Profile Name[%lu]:      %s%" WIDESTR_FMT "\n",
+                (u_long)i, i >= 10 ? " " : "  ", bss->strProfileName[0] ? bss->strProfileName : L"<Not connected>");
 
     (*_printf) ("    SSID:                   %s\n", get_ssid(&bss->dot11Ssid));
     (*_printf) ("    BSS Network type:       %s\n",

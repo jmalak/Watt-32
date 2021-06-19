@@ -62,7 +62,7 @@
 #define block_ip                    W32_NAMESPACE (block_ip)
 #define block_icmp                  W32_NAMESPACE (block_icmp)
 #define last_cookie                 W32_NAMESPACE (last_cookie)
-#define cookies                     W32_NAMESPACE (cookies)
+#define Cookies                     W32_NAMESPACE (Cookies)
 #define survive_eth                 W32_NAMESPACE (survive_eth)
 #define survive_bootp               W32_NAMESPACE (survive_bootp)
 #define survive_dhcp                W32_NAMESPACE (survive_dhcp)
@@ -125,6 +125,8 @@
 #define sock_stats                  W32_NAMESPACE (sock_stats)
 #define _inet_ntoa                  W32_NAMESPACE (_inet_ntoa)
 #define _inet_addr                  W32_NAMESPACE (_inet_addr)
+#define inet_ntop                   W32_NAMESPACE (inet_ntop)
+#define inet_pton                   W32_NAMESPACE (inet_pton)
 #define defaultdomain               W32_NAMESPACE (defaultdomain)
 #define dns_do_idna                 W32_NAMESPACE (dns_do_idna)
 #define dns_do_ipv6                 W32_NAMESPACE (dns_do_ipv6)
@@ -268,7 +270,7 @@
   #define delay  W32_NAMESPACE (delay)
 #endif
 
-#if !defined(__CYGWIN__) && !defined(__DJGPP__)
+#if !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__DJGPP__)
   #define gettimeofday  W32_NAMESPACE (gettimeofday)
 #endif
 
