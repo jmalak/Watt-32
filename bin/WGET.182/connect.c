@@ -66,7 +66,7 @@ extern int errno;
 #endif
 
 #if defined(__CYGWIN__) && defined(__USE_W32_SOCKETS)
-#define timeval __ms_timeval
+//#define timeval __ms_timeval
 #endif
 
 /* Variables shared by bindport and acceptport: */
@@ -104,12 +104,12 @@ connect_to_one (const unsigned char *addr, unsigned short port, int silent)
     {
       char *pretty_addr = pretty_print_address (addr);
       if (connection_host_name
-	  && 0 != strcmp (connection_host_name, pretty_addr))
-	logprintf (LOG_VERBOSE, _("Connecting to %s[%s]:%hu... "),
-		   connection_host_name, pretty_addr, port);
+          && 0 != strcmp (connection_host_name, pretty_addr))
+        logprintf (LOG_VERBOSE, _("Connecting to %s[%s]:%hu... "),
+                   connection_host_name, pretty_addr, port);
       else
-	logprintf (LOG_VERBOSE, _("Connecting to %s:%hu... "),
-		   pretty_addr, port);
+        logprintf (LOG_VERBOSE, _("Connecting to %s:%hu... "),
+                   pretty_addr, port);
     }
 
   /* Make an internet socket, stream type.  */
@@ -121,12 +121,12 @@ connect_to_one (const unsigned char *addr, unsigned short port, int silent)
     {
       /* Bind the client side to the requested address. */
       if (bind (sock, (struct sockaddr *)opt.bind_address,
-		sizeof (*opt.bind_address)))
-	{
+                sizeof (*opt.bind_address)))
+        {
           REALCLOSE (sock);
-	  sock = -1;
-	  goto out;
-	}
+          sock = -1;
+          goto out;
+        }
     }
 
   /* Connect the socket to the remote host.  */
@@ -142,14 +142,14 @@ connect_to_one (const unsigned char *addr, unsigned short port, int silent)
     {
       /* Success. */
       if (!silent)
-	logprintf (LOG_VERBOSE, _("connected.\n"));
+        logprintf (LOG_VERBOSE, _("connected.\n"));
       DEBUGP (("Created socket %d.\n", sock));
     }
   else
     {
       save_errno = errno;
       if (!silent)
-	logprintf (LOG_VERBOSE, "failed: %s.\n", strerror (errno));
+        logprintf (LOG_VERBOSE, "failed: %s.\n", strerror (errno));
       errno = save_errno;
     }
 
@@ -171,13 +171,13 @@ connect_to_many (struct address_list *al, unsigned short port, int silent)
 
       sock = connect_to_one (addr, port, silent);
       if (sock >= 0)
-	/* Success. */
-	return sock;
+        /* Success. */
+        return sock;
 
       address_list_set_faulty (al, i);
 
       /* The attempt to connect has failed.  Continue with the loop
-	 and try next address. */
+         and try next address. */
     }
 
   return -1;
@@ -231,7 +231,7 @@ bindport (unsigned short *port)
   if ((msock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     return CONSOCKERR;
   if (setsockopt (msock, SOL_SOCKET, SO_REUSEADDR,
-		  (char *)&optval, sizeof (optval)) < 0)
+                  (char *)&optval, sizeof (optval)) < 0)
     return CONSOCKERR;
 
   if (opt.bind_address == NULL)
@@ -257,11 +257,11 @@ bindport (unsigned short *port)
          because that can be 64-bit.  */
       int addrlen = sizeof (struct sockaddr_in);
       if (getsockname (msock, addr, &addrlen) < 0)
-	{
-	  CLOSE (msock);
-	  msock = -1;
-	  return CONPORTERR;
-	}
+        {
+          CLOSE (msock);
+          msock = -1;
+          return CONPORTERR;
+        }
       *port = ntohs (srv.sin_port);
     }
   if (listen (msock, 1) < 0)
@@ -294,7 +294,7 @@ select_fd (int fd, int maxtime, int writep)
   timeout.tv_usec = 0;
   /* HPUX reportedly warns here.  What is the correct incantation?  */
   return select (fd + 1, writep ? NULL : &fds, writep ? &fds : NULL,
-		 &exceptfds, &timeout);
+                 &exceptfds, &timeout);
 }
 #endif /* HAVE_SELECT */
 
@@ -339,7 +339,7 @@ conaddr (int fd)
   static unsigned char res[4];
   struct sockaddr_in mysrv;
   struct sockaddr *myaddr;
-  int addrlen = sizeof (mysrv);	/* see bindport() for discussion of
+  int addrlen = sizeof (mysrv); /* see bindport() for discussion of
                                    using `int' here. */
 
   myaddr = (struct sockaddr *) (&mysrv);
@@ -363,21 +363,21 @@ iread (int fd, char *buf, int len)
     {
 #ifdef HAVE_SELECT
       if (opt.timeout)
-	{
-	  do
-	    {
-	      res = select_fd (fd, opt.timeout, 0);
-	    }
-	  while (res == -1 && errno == EINTR);
-	  if (res <= 0)
-	    {
-	      /* Set errno to ETIMEDOUT on timeout.  */
-	      if (res == 0)
-		/* #### Potentially evil!  */
-		errno = ETIMEDOUT;
-	      return -1;
-	    }
-	}
+        {
+          do
+            {
+              res = select_fd (fd, opt.timeout, 0);
+            }
+          while (res == -1 && errno == EINTR);
+          if (res <= 0)
+            {
+              /* Set errno to ETIMEDOUT on timeout.  */
+              if (res == 0)
+                /* #### Potentially evil!  */
+                errno = ETIMEDOUT;
+              return -1;
+            }
+        }
 #endif
       res = READ (fd, buf, len);
     }
@@ -403,30 +403,30 @@ iwrite (int fd, char *buf, int len)
   while (len > 0)
     {
       do
-	{
+        {
 #ifdef HAVE_SELECT
-	  if (opt.timeout)
-	    {
-	      do
-		{
-		  res = select_fd (fd, opt.timeout, 1);
-		}
-	      while (res == -1 && errno == EINTR);
-	      if (res <= 0)
-		{
-		  /* Set errno to ETIMEDOUT on timeout.  */
-		  if (res == 0)
-		    /* #### Potentially evil!  */
-		    errno = ETIMEDOUT;
-		  return -1;
-		}
-	    }
+          if (opt.timeout)
+            {
+              do
+                {
+                  res = select_fd (fd, opt.timeout, 1);
+                }
+              while (res == -1 && errno == EINTR);
+              if (res <= 0)
+                {
+                  /* Set errno to ETIMEDOUT on timeout.  */
+                  if (res == 0)
+                    /* #### Potentially evil!  */
+                    errno = ETIMEDOUT;
+                  return -1;
+                }
+            }
 #endif
-	  res = WRITE (fd, buf, len);
-	}
+          res = WRITE (fd, buf, len);
+        }
       while (res == -1 && errno == EINTR);
       if (res <= 0)
-	break;
+        break;
       buf += res;
       len -= res;
     }

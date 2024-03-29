@@ -46,38 +46,27 @@
  * word.  The high 2 bits of the upper word are used
  * to encode the in/out status of the parameter; for now
  * we restrict parameters to at most 128 bytes.
- *
- * Watcom 16-bit targets (small/large) need special handling
- * to avoid warnings like:
- *   ioctl.c(99): Warning! W135: Shift amount too large
- *
- * Hence use a '(long)' cast in several places below.
  */
-#if defined(__WATCOMC__) && defined(__I86__)
-  #define W32_IOCTL_CAST(val)  ((long)(val))
-#else
-  #define W32_IOCTL_CAST(val)  val
-#endif
 
-#define IOCPARM_MASK W32_IOCTL_CAST (0x7f)           /* parameters must be < 128 bytes */
+#define IOCPARM_MASK    0x7f                   /* parameters must be < 128 bytes */
 
 #define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
 #define IOCBASECMD(x)   ((x) & ~IOCPARM_MASK)
 #define IOCGROUP(x)     (((x) >> 8) & 0xff)
 
-#define IOCPARM_MAX     W32_IOCTL_CAST (4096)        /* max size of ioctl */
-#define IOC_VOID        W32_IOCTL_CAST (0x20000000)  /* no parameters */
-#define IOC_OUT         W32_IOCTL_CAST (0x40000000)  /* copy out parameters */
-#define IOC_IN          W32_IOCTL_CAST (0x80000000)  /* copy in parameters */
-#define IOC_INOUT       (IOC_IN|IOC_OUT)             /* 0x20000000 distinguishes new &
-                                                        old ioctl's */
-#define IOC_DIRMASK     W32_IOCTL_CAST (0xe0000000)  /* mask for IN/OUT/VOID */
+#define IOCPARM_MAX     4096                   /* max size of ioctl */
+#define IOC_VOID        0x20000000             /* no parameters */
+#define IOC_OUT         0x40000000             /* copy out parameters */
+#define IOC_IN          0x80000000             /* copy in parameters */
+#define IOC_INOUT       (IOC_IN|IOC_OUT)       /* 0x20000000 distinguishes new &
+                                                  old ioctl's */
+#define IOC_DIRMASK     0xe0000000             /* mask for IN/OUT/VOID */
 
-#define _IO(x,y)    (IOC_VOID|(x<<8)|y)
-#define _IOR(x,y,t) (IOC_OUT|((sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
-#define _IOW(x,y,t) (IOC_IN|((sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
+#define _IO(x,y)        (IOC_VOID|(x<<8)|y)
+#define _IOR(x,y,t)     (IOC_OUT|((sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
+#define _IOW(x,y,t)     (IOC_IN|((sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
 /* this should be _IORW, but stdio got there first */
-#define _IOWR(x,y,t) (IOC_INOUT|((sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
+#define _IOWR(x,y,t)    (IOC_INOUT|((sizeof(t)&IOCPARM_MASK)<<16)|(x<<8)|y)
 
 /*
  * file i/o controls

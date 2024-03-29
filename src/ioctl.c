@@ -94,7 +94,7 @@ static int file_ioctrl (Socket *socket, long cmd, void *argp)
 {
   int len;
 
-  switch ((DWORD)cmd)
+  switch (cmd)
   {
     case FIONREAD:
          VERIFY_RW (argp, sizeof(u_long));
@@ -280,7 +280,7 @@ static int iface_ioctrl (Socket *socket, long cmd, void *argp)
 
   VERIFY_RW (argp, sizeof(*ifr));
 
-  switch ((DWORD)cmd)
+  switch (cmd)
   {
     case SIOCSARP:
     case SIOCGARP:
@@ -514,7 +514,7 @@ static int iface_ioctrl (Socket *socket, long cmd, void *argp)
  */
 static int waterm_ioctrl (Socket *socket, long cmd, void *argp)
 {
-  switch ((DWORD)cmd)
+  switch (cmd)
   {
     case SIOCSHIWAT:
          /** \todo set high watermark */
@@ -556,7 +556,7 @@ static int arp_ioctrl (Socket *socket, long cmd, void *argp)
   eth_address   *eth;
   DWORD  ip;
 
-  switch ((DWORD)cmd)
+  switch (cmd)
   {
     case SIOCSARP:      /* add given IP/MAC-addr pair to ARP cache */
          ip  = intel (*(DWORD*)arp->arp_pa.sa_data);

@@ -94,7 +94,8 @@ int main (int argc, char **argv)
     if (non_block)
     {
       fd_set fd;
-      struct __ms_timeval tv = { 0, 10000 };
+//      struct __ms_timeval tv = { 0, 10000 };
+      struct timeval tv = { 0, 10000 };
       int    n;
 
       FD_ZERO (&fd);

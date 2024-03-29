@@ -138,7 +138,7 @@
  */
 #if !defined(__CYGWIN__) || !defined(__USE_W32_SOCKETS)
   #define __ms_u_long   u_long
-  #define __ms_timeval  timeval
+//  #define __ms_timeval  timeval
 #endif
 
 #ifndef __ms_u_long
